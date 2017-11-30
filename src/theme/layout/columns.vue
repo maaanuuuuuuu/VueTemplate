@@ -9,7 +9,7 @@
     </div>
 </template>
 <script scoped>
-    import Post from './post.vue'
+    import Post from '../components/card.vue'
     import { mapGetters } from 'vuex'
     export default {
       components: {
@@ -19,29 +19,17 @@
         ...mapGetters('postModule', ['posts'])
       },
       methods: {
-        debug (param) {
-          console.log(param)
-        },
         loadPosts () {
           let postId = this.$route.params.id
-          console.log('postId=' + postId)
           this.$store.dispatch('postModule/updateColumn', postId)
-        },
-        displayContent (theURL, event) {
-          this.debug(this)
-          this.debug(theURL)
-          this.debug(event)
-          this.debug(event.target) // add active-card class but to which element ?
         }
       },
       watch: {
         '$route' (to, from) {
-          this.debug('changed to ' + this.$route.params.id)
           this.loadPosts()
         }
       },
       created () {
-        this.debug('created')
         this.loadPosts()
       }
     }

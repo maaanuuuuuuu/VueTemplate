@@ -21,9 +21,5 @@
   }
 </script>
 <style lang="scss">
-  $section-padding: 0px;
-  
   @import '~bulma';
-
- 
 </style>

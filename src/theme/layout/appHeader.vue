@@ -1,21 +1,21 @@
 <template>
     <nav class="navbar" role="navigation" aria-label="main navigation">
         <div class="container">
-          <router-link to="/news/all" exact>
+          <router-link to="/" exact>
             <img src="http://bit.ly/vue-img"
               alt="Vue SPA" />
           </router-link>
-          <router-link to="/news/all" class="navbar-item">
-              Home
+          <router-link to="/" class="navbar-item">
+            Home
           </router-link>
-          <router-link to="/news/economy" class="navbar-item">
-              Economy
+          <router-link to="{ name: 'routeExample', params: { id: 'section1'} }" class="navbar-item">
+            Section1
           </router-link>
-          <router-link :to="{ name: 'news', params: { id: 'politics'} }" class="navbar-item">
-              Politics
+          <router-link :to="{ name: 'routeExample', params: { id: 'section2'} }" class="navbar-item">
+            Section2
           </router-link>
-          <router-link to="/login" class="navbar-item">
-              <span v-if="isAuthenticated">Logout</span><span v-else>Login</span>
+          <router-link to="/logout" class="navbar-item">
+            Logout
           </router-link>
         </div>
     </nav>

@@ -15,9 +15,9 @@ const router = new VueRouter({
   linkActiveClass: 'is-active',
   scrollBehavior: (to, from, savedPosition) => ({ y: savedPosition }),
   routes: [
-    { path: '/', redirect: '/news/all' },
+    // { path: '/', redirect: '/section/all' },
     { path: '/login', component: Login },
-    { path: '/news/:id', name: 'news', component: Columns },
+    { path: '/section/:id', name: 'routeExample', component: Columns },
     { path: '*', component: NotFound }
   ]
 })

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import trainingAPIService from '../services/trainingAPI.js'
+import authAPIService from '../services/examples/authAPIExample.js'
 import postModule from './posts.js'
 
 Vue.use(Vuex)
@@ -25,7 +25,7 @@ const store = new Vuex.Store({
     },
     login (context, credentials) {
       return new Promise((resolve) => {
-        trainingAPIService.login(credentials)
+        authAPIService.login(credentials)
           .then((data) => {
             context.commit('login', data) // commit the mutation (change of state)
             resolve()
