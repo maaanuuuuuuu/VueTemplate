@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import authAPIService from '../services/examples/authAPIExample.js'
-import postModule from './posts.js'
 
 Vue.use(Vuex)
 
@@ -11,7 +10,6 @@ const state = {
 
 const store = new Vuex.Store({
   modules: {
-    postModule
   },
   state,
   getters: {

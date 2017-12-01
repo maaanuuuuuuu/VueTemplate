@@ -22,13 +22,21 @@ const config = {
                 loader: 'vue-loader',
                 options: {
                     css: 'css-loader',
-                    'scss': 'css-loader|sass-loader'
+                    'scss': 'sass-loader'
                 }
             },
             {
                 test: /\.js/,
                 loader: 'babel-loader',
                 exclude: /node_modules/
+            },
+            {
+                loader:'css-loader',
+                test: /\.css$/
+            },
+            {
+                loader:'file-loader',
+                test: /\.(png|jpg|gif|ttf|woff)$/,
             }
         ]
     },

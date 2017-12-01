@@ -1,30 +1,36 @@
 <template>
-    <nav class="navbar" role="navigation" aria-label="main navigation">
-        <div class="container">
-          <router-link to="/" exact>
-            <img src="http://bit.ly/vue-img"
-              alt="Vue SPA" />
-          </router-link>
-          <router-link to="/" class="navbar-item">
-            Home
-          </router-link>
-          <router-link to="{ name: 'routeExample', params: { id: 'section1'} }" class="navbar-item">
-            Section1
-          </router-link>
-          <router-link :to="{ name: 'routeExample', params: { id: 'section2'} }" class="navbar-item">
-            Section2
-          </router-link>
-          <router-link to="/logout" class="navbar-item">
-            Logout
-          </router-link>
-        </div>
-    </nav>
+  <el-menu class="el-menu" mode="horizontal" @select="handleSelect" router=true>
+    <el-menu-item v-for="(section, title) in sections" :index="section.id" :key="section.id" >
+      {{ section.title }}
+    </el-menu-item>
+  </el-menu>
 </template>
 <script>
-  import {mapGetters} from 'vuex'
+  import { mapGetters } from 'vuex'
+  import { Menu, MenuItem } from 'element-ui'
+
   export default {
     computed: {
       ...mapGetters(['isAuthenticated'])
+    },
+    data () {
+      return {
+        sections: [
+          {id: 'home', title: 'Home', href: '/'},
+          {id: 'layouts', title: 'Layouts', href: '/layouts'},
+          {id: 'components', title: 'Components', href: '/components'},
+          {id: 'notfound', title: 'Not found', href: '/notfound'}
+        ]
+      }
+    },
+    methods: {
+      handleSelect (key, keyPath) {
+        console.log(key, keyPath)
+      }
+    },
+    components: {
+      'el-menu': Menu,
+      'el-menu-item': MenuItem
     }
   }
 </script>

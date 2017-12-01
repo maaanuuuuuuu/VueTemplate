@@ -1,5 +1,5 @@
 import Vue from 'vue' // import vue module
-import AppLayout from './theme/layout.vue'
+import AppLayout from './theme/layout/classicLayout.vue'
 import router from './router'
 import store from './vuex/index.js'
 
