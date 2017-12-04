@@ -4,6 +4,7 @@ import VueRouter from 'vue-router'
 import Login from './theme/components/login.vue'
 import NotFound from './theme/components/notFound.vue'
 import DemoComponents from './theme/components/demoComponents.vue'
+import ChecklistQuestionnaire from './theme/components/checklist-questionnaire.vue'
 // FOR LAZY LOADING
 // const Columns = () => System.import('./theme/Columns.vue')
 // const Login = () => System.import('./theme/login.vue')
@@ -22,6 +23,7 @@ const router = new VueRouter({
     { path: '/home' },
     { path: '/components', component: DemoComponents },
     { path: '/layouts' },
+    { path: '/sandbox', component: ChecklistQuestionnaire },
     { path: '/notfound', component: NotFound },
     { path: '*', component: NotFound }
   ]

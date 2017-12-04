@@ -2,15 +2,15 @@
     <div>
         <h3>These components are eather created by the team or unmodified ElementUI components</h3>
         <el-row :gutter="20">
-            <el-col :span="24" :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+            <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
                 <login></login>
             </el-col>
-            <el-col :span="24" :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+            <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
 
             </el-col>
         </el-row>
         <el-row :gutter="20">
-            <el-col :span="24" :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+            <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
                 <el-card class="box-card">
                   <div slot="header" class="clearfix">
                     <span>Card name</span>
@@ -21,7 +21,7 @@
                   </div>
                 </el-card>
             </el-col>
-            <el-col :span="24" :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+            <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
 
             </el-col>
         </el-row>

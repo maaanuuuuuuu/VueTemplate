@@ -1,5 +1,5 @@
 <template>
-  <el-menu class="el-menu" mode="horizontal" @select="handleSelect" router=true>
+  <el-menu class="el-menu" mode="horizontal" @select="handleSelect" :router="true">
     <el-menu-item v-for="(section, title) in sections" :index="section.id" :key="section.id" >
       {{ section.title }}
     </el-menu-item>
@@ -19,6 +19,7 @@
           {id: 'home', title: 'Home', href: '/'},
           {id: 'layouts', title: 'Layouts', href: '/layouts'},
           {id: 'components', title: 'Components', href: '/components'},
+          {id: 'sandbox', title: 'Sandbox', href: '/sandbox'},
           {id: 'notfound', title: 'Not found', href: '/notfound'}
         ]
       }
