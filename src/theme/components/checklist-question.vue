@@ -1,20 +1,20 @@
 <template>
   <div>
-    <el-row :gutter="20">
+    <el-row :gutter="20" class="questionInputRow">
       <el-col :sm="1">
-        <el-button icon="el-icon-rank"></el-button>
+        <el-button icon="el-icon-rank" :disabled="isDisabled" class="draggableHandle"></el-button>
        </el-col>
       <el-col :sm="1">
-        <el-button icon="el-icon-delete"></el-button>
+        <el-button icon="el-icon-delete" :disabled="isDisabled" @click="questionDelete"></el-button>
       </el-col>
       <el-col :sm="2">
-        <el-input placeholder="code" :value="question.code" @change="updateCode"></el-input>
+        <el-input placeholder="code" :value="question.code" @change="updateCode" @focus="questionFocus" class="codeInputField"></el-input>
       </el-col>
       <el-col :sm="14">
-        <el-autocomplete placeholder="Create a new question" :value="question.title" :fetch-suggestions="querySearch" :trigger-on-focus="false" @select="questionSelected" v-model="title"></el-autocomplete>
+        <el-autocomplete placeholder="Create a new question" :disabled="isDisabled" :value="question.title" :fetch-suggestions="querySearch" :trigger-on-focus="false" @select="questionSelected" v-model="title"></el-autocomplete>
       </el-col>
       <el-col :sm="5">
-        <el-select :value="question.answerType" placeholder="Type of answer" @change="updateAnswerType">
+        <el-select :value="question.answerType" :disabled="isDisabled" placeholder="Type of answer" @change="updateAnswerType">
           <el-option label="Text" value="stringAnswer"></el-option>
           <el-option label="Number" value="numberAnswer"></el-option>
           <el-option label="Choice" value="choiceAnswer"></el-option>
@@ -22,7 +22,7 @@
         </el-select>
       </el-col>
       <el-col :sm="1">
-        <el-button class="mandatoryButton">*</el-button>
+        <el-checkbox-button class="mandatoryButton" :disabled="isDisabled" >*</el-checkbox-button>
       </el-col>
     </el-row>
     <el-row :gutter="20" class="possibleAnswersRow">
@@ -48,36 +48,30 @@
     padding: 12px 15px;
     margin-left: 0px;
   }
-  .el-button.mandatoryButton {
-    font-size: 32px;
-    line-height: 0.85;
-    height: 40px;
-  }
   .possibleAnswersRow {
     padding-top: 10px;
   }
 </style>
 <script>
-  import { Row, Col, Button, Input, Autocomplete, Select, Option } from 'element-ui'
+  import { Row, Col, Button, Input, Autocomplete, Select, Option, CheckboxButton } from 'element-ui'
   import PossibleAnswer from './checklist-possibleAnswer.vue'
 
   export default {
-    props: ['question'],
+    props: {
+      question: {
+        default: {},
+        type: Object
+      },
+      isDisabled: {
+        default: false,
+        type: Boolean
+      }
+    },
     data () {
       return {
         questionLibrary: [],
         answerLibrary: [],
         title: this.question.title
-        // question: {
-        //   code: '',
-        //   title: '',
-        //   answerType: '',
-        //   possibleAnswers: []
-        // }
-        // code: this.question.code,
-        // title: this.question.title,
-        // answerType: this.question.answerType,
-        // possibleAnswers: this.question.possibleAnswers
       }
     },
     methods: {
@@ -152,11 +146,16 @@
         this.question.code = value
       },
       updateTitle (value) {
-        console.log('updateTitle')
         this.question.title = value
       },
       updateAnswerType (value) {
         this.question.answerType = value
+      },
+      questionFocus () {
+        this.$emit('questionFocus', this.question)
+      },
+      questionDelete () {
+        this.$emit('questionDelete', this.question)
       }
     },
     watch: {
@@ -172,6 +171,7 @@
       'el-autocomplete': Autocomplete,
       'el-select': Select,
       'el-option': Option,
+      'el-checkbox-button': CheckboxButton,
       'possibleAnswer': PossibleAnswer
     },
     mounted () {

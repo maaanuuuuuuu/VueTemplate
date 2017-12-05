@@ -2,8 +2,10 @@
   <div>
     <el-row>
       <el-col :sm="24">
-        <question v-for="question in questionnaire" :question.sync="question" :key="question.id"></question>
-        <question :question.sync="emptyQuestion"></question>
+        <vue-draggable v-model="questionnaire" :options="{handle: '.draggableHandle'}">
+          <question v-for="(question, index) in questionnaire" :question.sync="question" :key="question.id" :id="'question-'+index" v-on:questionDelete="deleteQuestion"></question>
+        </vue-draggable>
+        <question :question.sync="emptyQuestion" v-on:questionFocus="newQuestionFocus" :isDisabled="true"></question>
       </el-col>
     </el-row>
   </div>
@@ -12,25 +14,44 @@
 <script>
   import { Row, Col } from 'element-ui'
   import Question from './checklist-question.vue'
+  import draggable from 'vuedraggable'
+
+  const emptyQuestiontemplate = { id: 0, code: '', title: '', answerType: 'stringAnswer' }
 
   export default {
     data () {
       return {
-        emptyQuestion: { id: 0, code: '', title: '', answerType: 'stringAnswer' },
+        emptyQuestion: {
+          ...emptyQuestiontemplate // clone object
+        },
         questionnaire: [
-          { id: 1, code: 'name', title: 'What\'s your name?', answerType: 'stringAnswer' },
-          { id: 2, code: 'hairColor', title: 'What\'s your hair color?', answerType: 'stringAnswer' }
+          { id: 1, code: 'name', title: 'What\'s your name?', answerType: 'stringAnswer', isMandatory: true },
+          { id: 2, code: 'hairColor', title: 'What\'s your hair color?', answerType: 'stringAnswer', isMandatory: false }
         ]
       }
     },
     components: {
       'question': Question,
       'el-row': Row,
-      'el-col': Col
+      'el-col': Col,
+      'vue-draggable': draggable
     },
     methods: {
       questionChanged () {
         console.log('question changed')
+      },
+      newQuestionFocus (question) {
+        this.questionnaire.push(question)
+        this.emptyQuestion = {
+          ...emptyQuestiontemplate // clone object
+        }
+        this.$nextTick().then(function (component) {
+          // focus on last element from questionnaire
+          document.getElementById('question-' + (component.questionnaire.length - 1)).getElementsByClassName('codeInputField')[0].getElementsByTagName('input')[0].focus()
+        })
+      },
+      deleteQuestion (question) {
+        this.questionnaire.splice(this.questionnaire.indexOf(question), 1)
       }
     },
     watch: {
