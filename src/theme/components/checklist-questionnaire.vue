@@ -2,12 +2,8 @@
   <div>
     <el-row>
       <el-col :sm="24">
-        <question v-for="question in questionnaire" :question="question" :key="question.id"></question>
-      </el-col>
-    </el-row>
-    <el-row>
-      <el-col :sm="24">
-        <question :question="emptyQuestion"></question>
+        <question v-for="question in questionnaire" :question.sync="question" :key="question.id"></question>
+        <question :question.sync="emptyQuestion"></question>
       </el-col>
     </el-row>
   </div>
@@ -31,6 +27,20 @@
       'question': Question,
       'el-row': Row,
       'el-col': Col
+    },
+    methods: {
+      questionChanged () {
+        console.log('question changed')
+      }
+    },
+    watch: {
+      // emptyQuestion: {
+      //   handler: function (newValue, oldValue) {
+      //     console.log('handler')
+      //     this.questionnaire.push(newValue)
+      //   },
+      //   deep: true
+      // }
     }
   }
 </script>

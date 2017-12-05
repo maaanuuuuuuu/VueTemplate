@@ -1,18 +1,20 @@
 <template>
   <div>
     <el-row :gutter="20">
-      <el-col :sm="2">
+      <el-col :sm="1">
         <el-button icon="el-icon-rank"></el-button>
+       </el-col>
+      <el-col :sm="1">
         <el-button icon="el-icon-delete"></el-button>
       </el-col>
       <el-col :sm="2">
-        <el-input placeholder="code" v-model.trim="code"></el-input>
+        <el-input placeholder="code" :value="question.code" @change="updateCode"></el-input>
       </el-col>
       <el-col :sm="14">
-        <el-autocomplete placeholder="What's your question ?" v-model.lazy.trim="title" :fetch-suggestions="querySearch" :trigger-on-focus="false" @select="questionSelected"></el-autocomplete>
+        <el-autocomplete placeholder="Create a new question" :value="question.title" :fetch-suggestions="querySearch" :trigger-on-focus="false" @select="questionSelected" v-model="title"></el-autocomplete>
       </el-col>
       <el-col :sm="5">
-        <el-select v-model="answerType" placeholder="Type of answer" @change="answerTypeChanged">
+        <el-select :value="question.answerType" placeholder="Type of answer" @change="updateAnswerType">
           <el-option label="Text" value="stringAnswer"></el-option>
           <el-option label="Number" value="numberAnswer"></el-option>
           <el-option label="Choice" value="choiceAnswer"></el-option>
@@ -28,7 +30,7 @@
         &zwnj;
       </el-col>
       <el-col :sm="6">
-        <div v-for="possibleAnswer in possibleAnswers" :key="possibleAnswer.code">
+        <div v-for="possibleAnswer in question.possibleAnswers" :key="possibleAnswer.code">
           <possibleAnswer :answer="possibleAnswer"></possibleAnswer>
         </div>
       </el-col>
@@ -65,10 +67,17 @@
       return {
         questionLibrary: [],
         answerLibrary: [],
-        code: '',
-        title: '',
-        answerType: '',
-        possibleAnswers: []
+        title: this.question.title
+        // question: {
+        //   code: '',
+        //   title: '',
+        //   answerType: '',
+        //   possibleAnswers: []
+        // }
+        // code: this.question.code,
+        // title: this.question.title,
+        // answerType: this.question.answerType,
+        // possibleAnswers: this.question.possibleAnswers
       }
     },
     methods: {
@@ -129,7 +138,6 @@
         ]
       },
       questionSelected (question) {
-        console.log('questionSelected')
         question = question.model
         this.code = question.code
         this.answerType = question.answerType
@@ -140,20 +148,20 @@
           }
         }
       },
-      answerTypeChanged (selectedValue) {
-        console.log('answerTypeChanged')
-        if (selectedValue === 'choiceAnswer') {
-          console.log('print the options creator form')
-        }
+      updateCode (value) {
+        this.question.code = value
+      },
+      updateTitle (value) {
+        console.log('updateTitle')
+        this.question.title = value
+      },
+      updateAnswerType (value) {
+        this.question.answerType = value
       }
     },
     watch: {
       title: function (newValue, oldValue) {
-        // console.log(this.title)
-        // console.log(oldValue + '=>' + newValue)
-        // if (this.newValue !== this.title) {
-        //   console.log('changed the value')
-        // }
+        this.updateTitle(newValue)
       }
     },
     components: {
@@ -168,10 +176,6 @@
     },
     mounted () {
       this.questionLibrary = this.loadAllQuestions()
-      this.code = this.question.code
-      this.title = this.question.title
-      this.answerType = this.question.answerType
-      this.possibleAnswers = this.question.possibleAnswers
     }
   }
 </script>
