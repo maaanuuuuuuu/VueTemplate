@@ -13,8 +13,9 @@
 
 <script>
   import { Row, Col } from 'element-ui'
-  import Question from './checklist-question.vue'
   import draggable from 'vuedraggable'
+  
+  import Question from './checklist-question.vue'
 
   const emptyQuestiontemplate = { id: 0, code: '', title: '', answerType: 'stringAnswer' }
 
@@ -41,11 +42,11 @@
         console.log('question changed')
       },
       newQuestionFocus (question) {
-        this.questionnaire.push(question)
+        this.questionnaire.push(question) // a new question is being created
         this.emptyQuestion = {
           ...emptyQuestiontemplate // clone object
         }
-        this.$nextTick().then(function (component) {
+        this.$nextTick().then(function (component) { // ot getElements in the Dom to put the focus on the newly created question we have to wait until the Dom has been updated
           // focus on last element from questionnaire
           document.getElementById('question-' + (component.questionnaire.length - 1)).getElementsByClassName('codeInputField')[0].getElementsByTagName('input')[0].focus()
         })

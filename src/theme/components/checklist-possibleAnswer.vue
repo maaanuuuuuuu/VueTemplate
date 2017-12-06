@@ -1,14 +1,16 @@
 <template>
-  <el-row :gutter="20" class="possibleAnswerRow">
-    <el-col :sm="4" class="answerButtons">
+  <el-row :gutter="5" class="possibleAnswerRow">
+    <el-col :sm="2" class="answerButtons draggableHandle">
       <i class="el-icon-rank"></i>
-      <i class="el-icon-delete"></i>
     </el-col>
-    <el-col :sm="9">
-      <el-input placeholder="Write the answer" v-model.trim="answer.title" size="mini" ></el-input>
+    <el-col :sm="2" class="answerButtons" >
+      <i class="el-icon-delete" @click="possibleAnswerDelete"></i>
     </el-col>
-    <el-col :sm="9">
+    <el-col :sm="7">
         <el-input placeholder="code" v-model.trim="answer.code" size="mini" ></el-input>
+    </el-col>
+    <el-col :sm="11">
+      <el-input placeholder="New possible answer" v-model.trim="answer.title" size="mini" ></el-input>
     </el-col>
     <el-col :sm="2" class="answerButtons">
       <i class="el-icon-arrow-down"></i>
@@ -26,6 +28,12 @@
       'el-input': Input,
       'el-row': Row,
       'el-col': Col
+    },
+    methods: {
+      possibleAnswerDelete () {
+        console.log('possibleAnswerDelete')
+        this.$emit('possibleAnswerDelete', this.answer)
+      }
     }
   }
 </script>

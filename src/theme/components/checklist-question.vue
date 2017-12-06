@@ -8,13 +8,25 @@
         <el-button icon="el-icon-delete" :disabled="isDisabled" @click="questionDelete"></el-button>
       </el-col>
       <el-col :sm="2">
-        <el-input placeholder="code" :value="question.code" @change="updateCode" @focus="questionFocus" class="codeInputField"></el-input>
+        <el-input 
+          placeholder="code"
+          v-model="code"
+          @focus="codeFocus"
+          @change="codeChange"
+          class="codeInputField">
+        </el-input>
       </el-col>
       <el-col :sm="14">
-        <el-autocomplete placeholder="Create a new question" :disabled="isDisabled" :value="question.title" :fetch-suggestions="querySearch" :trigger-on-focus="false" @select="questionSelected" v-model="title"></el-autocomplete>
+        <el-autocomplete 
+          placeholder="Create a new question" 
+          :disabled="isDisabled" v-model="title" 
+          :fetch-suggestions="querySearch" 
+          :trigger-on-focus="false" 
+          @select="questionSelected">
+        </el-autocomplete>
       </el-col>
       <el-col :sm="5">
-        <el-select :value="question.answerType" :disabled="isDisabled" placeholder="Type of answer" @change="updateAnswerType">
+        <el-select v-model="answerType" :disabled="isDisabled" placeholder="Type of answer">
           <el-option label="Text" value="stringAnswer"></el-option>
           <el-option label="Number" value="numberAnswer"></el-option>
           <el-option label="Choice" value="choiceAnswer"></el-option>
@@ -29,10 +41,16 @@
       <el-col :sm="18">
         &zwnj;
       </el-col>
-      <el-col :sm="6">
-        <div v-for="possibleAnswer in question.possibleAnswers" :key="possibleAnswer.code">
-          <possibleAnswer :answer="possibleAnswer"></possibleAnswer>
-        </div>
+      <el-col :sm="6" class="possibleAnswersContainer">
+        <vue-draggable v-model="possibleAnswers" :options="{handle: '.draggableHandle'}">
+          <possibleAnswer
+            v-for="(possibleAnswer, index) in possibleAnswers"
+            :key="possibleAnswer.code"
+            :answer.sync="possibleAnswer"
+            v-on:possibleAnswerDelete="deletePossibleAnswer">
+          </possibleAnswer>
+        </vue-draggable>
+        <possibleAnswer v-if="question.answerType === 'choiceAnswer'" :answer.sync="emptyPossibleAnswer"></possibleAnswer>
       </el-col>
     </el-row>
   </div>
@@ -51,42 +69,49 @@
   .possibleAnswersRow {
     padding-top: 10px;
   }
+  .possibleAnswersContainer {
+    margin-bottom: 10px;
+  }
 </style>
 <script>
   import { Row, Col, Button, Input, Autocomplete, Select, Option, CheckboxButton } from 'element-ui'
+  import draggable from 'vuedraggable'
+
   import PossibleAnswer from './checklist-possibleAnswer.vue'
+
+  const emptyPossibleAnswerTemplate = {title: '', code: ''}
 
   export default {
     props: {
-      question: {
+      question: { // question in props allows communication between parent and child
         default: {},
         type: Object
       },
       isDisabled: {
         default: false,
         type: Boolean
+      },
+      emptyPossibleAnswer: {
+        default () {
+          return {
+            ...emptyPossibleAnswerTemplate // clone object
+          }
+        },
+        type: Object
       }
     },
     data () {
       return {
         questionLibrary: [],
         answerLibrary: [],
-        title: this.question.title
+        title: this.question.title,
+        code: this.question.code,
+        answerType: this.question.answerType,
+        possibleAnswers: this.question.possibleAnswers
       }
     },
     methods: {
-      querySearch (queryString, callback) {
-        var questionLibrary = this.questionLibrary
-        var results = queryString ? questionLibrary.filter(this.createFilter(queryString)) : questionLibrary
-        // call callback function to return suggestions
-        results = results.map(function (question) { return { value: question.title, model: question } })
-        callback(results)
-      },
-      createFilter (queryString) {
-        return (questionLibrary) => {
-          return (questionLibrary.tags.indexOf(queryString.toLowerCase()) !== -1)
-        }
-      },
+      // function that fetches the question library
       loadAllQuestions () {
         return [
           { id: 1, code: 'name', title: 'What\'s your name?', answerType: 'stringAnswer', tags: ['name', 'person'] },
@@ -98,15 +123,15 @@
             tags: ['gender', 'person'],
             possibleAnswers: [
               {
-                title: 'male',
+                title: 'a male person',
                 code: 'male'
               },
               {
-                title: 'female',
+                title: 'a female person',
                 code: 'female'
               },
               {
-                title: 'transgender',
+                title: 'a transgender person',
                 code: 'transgender'
               }
             ]},
@@ -119,11 +144,11 @@
             tags: ['policy', 'labour', 'standards', 'ethical', 'trading'],
             possibleAnswers: [
               {
-                title: 'yes',
+                title: 'yes please',
                 code: 'yes'
               },
               {
-                title: 'no',
+                title: 'no thanks',
                 code: 'no'
               }
             ]
@@ -131,10 +156,33 @@
           { id: 7, code: 'ethicalLabourStandardsAttach', title: 'Please attach', answerType: 'fileAnswer', tags: ['attach', 'file', 'upload'] }
         ]
       },
+      // the actual search inside the question library
+      querySearch (queryString, callback) {
+        var questionLibrary = this.questionLibrary
+        var results = queryString ? questionLibrary.filter(this.tagFilter(queryString)) : questionLibrary
+        // call callback function to return suggestions
+        results = results.map(function (question) { return { value: question.title, model: question } }) // value seems to be a mandatory propoerty to pass the title to print to the autocomplete component
+        callback(results)
+      },
+      // checks if a query is inside the tag array of a question
+      tagFilter (queryString) {
+        return (questionLibrary) => {
+          return (questionLibrary.tags.indexOf(queryString.toLowerCase()) !== -1)
+        }
+      },
+      // checks if a query is inside the code array of a question
+      codeFilter (queryString) {
+        return (questionLibrary) => {
+          return (questionLibrary.code === queryString.toLowerCase())
+        }
+      },
+      // a question from the library was selected, let's prefill the fields
       questionSelected (question) {
-        question = question.model
+        question = question.model ? question.model : question
         this.code = question.code
         this.answerType = question.answerType
+        this.title = question.title
+
         this.possibleAnswers = []
         if (question.answerType === 'choiceAnswer') {
           for (var i = 0; i < question.possibleAnswers.length; i++) {
@@ -142,25 +190,38 @@
           }
         }
       },
-      updateCode (value) {
-        this.question.code = value
+      deletePossibleAnswer (possibleAnswer) {
+        this.possibleAnswers.splice(this.possibleAnswers.indexOf(possibleAnswer), 1)
       },
-      updateTitle (value) {
-        this.question.title = value
-      },
-      updateAnswerType (value) {
-        this.question.answerType = value
-      },
-      questionFocus () {
+      // action events
+      codeFocus () {
         this.$emit('questionFocus', this.question)
       },
       questionDelete () {
         this.$emit('questionDelete', this.question)
+      },
+      codeChange (value) {
+        // if the code corresponds to an existing question from the library and the other fields are empty, set the fields accordingly
+        let questionLibrary = this.questionLibrary
+        let results = value ? questionLibrary.filter(this.codeFilter(value)) : questionLibrary
+        console.log(results)
+        if (results.length === 1) {
+          // one question was found in the library
+          let result = results[0]
+          this.questionSelected(result)
+        }
       }
     },
+    // update the value of the question prop for the parent component
     watch: {
       title: function (newValue, oldValue) {
-        this.updateTitle(newValue)
+        this.question.title = newValue
+      },
+      code: function (newValue, oldValue) {
+        this.question.code = newValue
+      },
+      answerType: function (newValue, oldValue) {
+        this.question.answerType = newValue
       }
     },
     components: {
@@ -172,7 +233,8 @@
       'el-select': Select,
       'el-option': Option,
       'el-checkbox-button': CheckboxButton,
-      'possibleAnswer': PossibleAnswer
+      'possibleAnswer': PossibleAnswer,
+      'vue-draggable': draggable
     },
     mounted () {
       this.questionLibrary = this.loadAllQuestions()
