@@ -1,38 +1,72 @@
 <template>
   <el-row :gutter="5" class="possibleAnswerRow">
-    <el-col :sm="2" class="answerButtons draggableHandle">
-      <i class="el-icon-rank"></i>
+    <el-col :sm="2" class="answerButtons">
+        <el-button icon="el-icon-rank" :disabled="isDisabled" class="draggableHandle" size="mini"></el-button>
     </el-col>
     <el-col :sm="2" class="answerButtons" >
-      <i class="el-icon-delete" @click="possibleAnswerDelete"></i>
+      <el-button icon="el-icon-delete" :disabled="isDisabled" @click="possibleAnswerDelete" size="mini"></el-button>
     </el-col>
     <el-col :sm="7">
-        <el-input placeholder="code" v-model.trim="answer.code" size="mini" ></el-input>
+        <el-input placeholder="code" v-model.trim="answer.code" size="mini" @focus="codeFocus" class="possibleAnswerCodeInputField"></el-input>
     </el-col>
     <el-col :sm="11">
-      <el-input placeholder="New possible answer" v-model.trim="answer.title" size="mini" ></el-input>
+      <el-input placeholder="New possible answer" v-model.trim="answer.title" size="mini" :disabled="isDisabled" ></el-input>
     </el-col>
     <el-col :sm="2" class="answerButtons">
-      <i class="el-icon-arrow-down"></i>
+        <el-checkbox v-model="isConditionalQuestionsDisplayChecked" size="mini" :disabled="isDisabled" border></el-checkbox>
     </el-col>
   </el-row>
 </template>
 
 <script>
-  import { Row, Col, Button, Input } from 'element-ui'
+  import { Row, Col, Button, Input, Checkbox } from 'element-ui'
 
   export default {
-    props: ['answer'],
+    data () {
+      return {
+        // code: this.answer.code,
+        // title: this.answer.title,
+        isConditionalQuestionsDisplayChecked: false
+      }
+    },
+    props: {
+      answer: { // answer in props allows communication between parent and child
+        default: {},
+        type: Object
+      },
+      isDisabled: {
+        default: false,
+        type: Boolean
+      }
+    },
     components: {
       'el-button': Button,
       'el-input': Input,
+      'el-checkbox': Checkbox,
       'el-row': Row,
       'el-col': Col
     },
     methods: {
       possibleAnswerDelete () {
-        console.log('possibleAnswerDelete')
         this.$emit('possibleAnswerDelete', this.answer)
+      },
+      codeFocus () {
+        this.$emit('answerFocus', this.answer)
+      },
+      conditionalQuestionsDisplayChecked (value) {
+        this.$emit('conditionalQuestionsDisplayChecked', value, this.answer.code)
+      }
+    },
+    watch: {
+      // title: function (newValue, oldValue) {
+      //   this.answer.title = newValue
+      // },
+      // code: function (newValue, oldValue) {
+      //   this.answer.code = newValue
+      // },
+      isConditionalQuestionsDisplayChecked: function (newValue, oldValue) {
+        this.answer.isConditionalQuestionsDisplayChecked = newValue
+        this.conditionalQuestionsDisplayChecked(newValue)
       }
     }
   }
@@ -42,7 +76,10 @@
     .possibleAnswerRow {
         padding-top: 5px;
     }
-    .answerButtons {
-        line-height: 1.9;
+    .answerButtons .el-button--mini {
+        padding: 7px 5px;
+    }
+    .answerButtons .el-checkbox--mini {
+        padding: 5px 10px 0px 10px;
     }
 </style>
