@@ -1,13 +1,13 @@
 <template>
   <div v-show="question.displayed">
-    <el-row :gutter="20" class="questionInputRow">
+    <el-row :gutter="5" class="questionInputRow">
       <el-col :sm="1">
-        <el-button icon="el-icon-rank" :disabled="question.isDisabled" class="draggableHandle"></el-button>
+        <el-button icon="el-icon-rank" :disabled="isDisabled" class="draggableHandle"></el-button>
        </el-col>
       <el-col :sm="1">
-        <el-button icon="el-icon-delete" :disabled="question.isDisabled" @click="questionDelete"></el-button>
+        <el-button icon="el-icon-delete" :disabled="isDisabled" @click="questionDelete"></el-button>
       </el-col>
-      <el-col :sm="2">
+      <el-col :sm="0">
         <el-input 
           placeholder="code"
           v-model="question.code"
@@ -16,34 +16,40 @@
           class="codeInputField">
         </el-input>
       </el-col>
-      <el-col :sm="14">
+      <el-col :sm="16">
         <el-autocomplete 
           placeholder="Create a new question" 
-          :disabled="question.isDisabled"
-          v-model="question.title" 
+          v-model="question.title"
+          @focus="titleFocus"
           :fetch-suggestions="querySearch" 
           :trigger-on-focus="false" 
-          @select="questionSelected">
+          @select="questionSelected"
+          class="titleInputField">
         </el-autocomplete>
       </el-col>
       <el-col :sm="5">
-        <el-select v-model="question.answerType" :disabled="question.isDisabled" placeholder="Type of answer">
+        <el-select v-model="question.answerType" :disabled="isDisabled" placeholder="Type of answer">
           <el-option label="Text" value="stringAnswer"></el-option>
+          <el-option label="Text" value="textAreaAnswer"></el-option>
           <el-option label="Number" value="numberAnswer"></el-option>
           <el-option label="Choice" value="choiceAnswer"></el-option>
+          <el-option label="Multiple Choice" value="multipleChoiceAnswer"></el-option>
           <el-option label="Upload File" value="fileAnswer"></el-option>
+          <el-option label="Date" value="dateAnswer"></el-option>
         </el-select>
       </el-col>
       <el-col :sm="1">
-        <el-checkbox-button class="mandatoryButton" :disabled="question.isDisabled" >*</el-checkbox-button>
+        <el-checkbox-button v-model="question.isMandatory" class="mandatoryButton" :disabled="isDisabled" >*</el-checkbox-button>
       </el-col>
     </el-row>
-    <el-row :gutter="20" class="possibleAnswersRow">
-      <el-col :sm="12">
+    <el-row :gutter="5" class="possibleAnswersRow">
+      <el-col :sm="14">
         &zwnj;
       </el-col>
-      <el-col :sm="12" class="possibleAnswersContainer">
-        <vue-draggable v-model="question.possibleAnswers" :options="{handle: '.draggableHandle'}">
+      <el-col v-show="question.possibleAnswers !== undefined && question.possibleAnswers.length > 0" :sm="10" class="possibleAnswersContainer">
+        <vue-draggable
+          v-model="question.possibleAnswers"
+          :options="{handle: '.draggableAnswersHandle', group: 'answers', ghostClass: 'sortGhost'}">
           <possibleAnswer
             v-for="(possibleAnswer, index) in question.possibleAnswers"
             :key="possibleAnswer.code"
@@ -54,7 +60,7 @@
           </possibleAnswer>
         </vue-draggable>
         <possibleAnswer
-          v-if="question.answerType === 'choiceAnswer'"
+          v-if="question.answerType === 'choiceAnswer' || question.answerType === 'multipleChoiceAnswer' "
           :answer.sync="emptyPossibleAnswer"
           v-on:answerFocus="newAnswerFocus"
           :isDisabled="true"
@@ -62,13 +68,33 @@
         </possibleAnswer>
       </el-col>
     </el-row>
-    <el-row :gutter="20" class="conditionalQuestionsRow">
-      <checklist-question
-        v-for="conditionalQuestion in question.conditionalQuestions"
-        :question="conditionalQuestion"
-        :key="conditionalQuestion.id"
-        >
-      </checklist-question>
+    <el-row :gutter="5" class="conditionalQuestionsRow">
+      <el-alert 
+        v-if="question.conditionalQuestions !== undefined && question.conditionalQuestions.length > 0 && conditionsAnswersChecked !== undefined && conditionsAnswersChecked.length > 0"
+        :title="'Conditional questions printed if the answer with the code '+ conditionsAnswersChecked+ ' is selected'"
+        type="info"
+        :closable="false"
+        show-icon>
+      </el-alert>
+      <vue-draggable
+        v-model="question.conditionalQuestions"
+        :options="{handle: '.draggableHandle', group: 'questions', ghostClass: 'sortGhost'}"
+        class="questionsContainer">
+        <checklist-question
+          v-for="(conditionalQuestion, index) in question.conditionalQuestions"
+          :question="conditionalQuestion"
+          :key="conditionalQuestion.id"
+          :id="'question'+question.code+'-'+index"
+          v-on:questionDelete="newConditionalQuestionDelete"
+          >
+        </checklist-question>
+      </vue-draggable>
+      <checklist-question 
+        v-if="conditionsAnswersChecked !== undefined && conditionsAnswersChecked.length > 0" 
+        :question="emptyQuestion"
+        v-on:questionFocus="newConditionalQuestionFocus"
+        :isDisabled="true"
+        class="emptyQuestionContainer"></checklist-question>
     </el-row>
   </div>
 </template>
@@ -85,25 +111,60 @@
   }
   .possibleAnswersRow {
     padding-top: 10px;
+    margin-left: 0px!important;  /* to rpevent ugly element negative margins */
+    margin-right: 0px!important;  /* to rpevent ugly element negative margins */
   }
   .possibleAnswersContainer {
-    margin-bottom: 10px;
+    padding-bottom: 10px;
+    background: rgba(71,143,192, 0.2);
+  }
+  .conditionalQuestionsRow {
+    margin-left: 0px!important; /* to rpevent ugly element negative margins */
+    margin-right: 0px!important; /* to rpevent ugly element negative margins */
+    background: rgba(71,143,192, 0.2);
+    /*background: linear-gradient( rgba(71,143,192,0), rgba(71,143,192, 0.2));*/
+  }
+  .conditionalQuestionsRow .questionInputRow {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .questionInputRow {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+  }
+  .questionInputRow .el-button--default {
+    padding: 12px 27%;
+  }
+  .sortGhost {
+    background-color: rgba(0, 0, 255, 0.2);
   }
 </style>
 <script>
-  import { Row, Col, Button, Input, Autocomplete, Select, Option, CheckboxButton } from 'element-ui'
+  import { Row, Col, Button, Input, Autocomplete, Select, Option, CheckboxButton, Alert } from 'element-ui'
   import draggable from 'vuedraggable'
 
   import PossibleAnswer from './checklist-possibleAnswer.vue'
   import ChecklistQuestion from './checklist-question.vue'
 
   const emptyPossibleAnswerTemplate = {title: '', code: ''}
+  const emptyQuestionTemplate = { id: 0, code: '', title: '', answerType: 'stringAnswer', displayed: true }
 
   export default {
     name: 'checklist-question', // mandatory to be able to do recursive components
     props: {
       question: { // question in props allows communication between parent and child
-        default: {},
+        default () {
+          return {
+            title: '',
+            code: '',
+            answerType: 'stringAnswer',
+            possibleAnswers: [],
+            conditionalQuestions: [],
+            answerConditions: [],
+            displayed: true
+          }
+        },
         type: Object
       },
       isDisabled: {
@@ -113,15 +174,10 @@
     },
     data () {
       return {
+        emptyQuestion: {
+          ...emptyQuestionTemplate // clone object
+        },
         questionLibrary: [],
-        // title: this.question.title,
-        // code: this.question.code,
-        // answerType: this.question.answerType,
-        // possibleAnswers: this.question.possibleAnswers,
-        // conditionalQuestions: this.question.conditionalQuestions || [],
-        // answerConditions: [],
-        // displayed: this.question.displayed,
-        // conditionsMetToDisplay: this.isDisplayed,
         conditionsAnswersChecked: [],
         emptyPossibleAnswer: {
           ...emptyPossibleAnswerTemplate // clone object
@@ -132,46 +188,250 @@
       // function that fetches the question library
       loadAllQuestions () {
         return [
-          { id: 1, code: 'name', title: 'What\'s your name?', answerType: 'stringAnswer', tags: ['name', 'person'] },
-          { id: 2, code: 'age', title: 'What\'s your age?', answerType: 'numberAnswer', tags: ['age', 'person'] },
-          { id: 3,
-            code: 'gender',
-            title: 'What\'s your gender?',
-            answerType: 'choiceAnswer',
-            tags: ['gender', 'person'],
+          {
+            id: 1,
+            code: 'SSI-1',
+            title: 'Project / Site Name',
+            answerType: 'text',
+            tags: [
+              'site',
+              'project'
+            ]
+          },
+          {
+            id: 2,
+            code: 'SSI-2',
+            title: 'Supervisor / Foreman at the time of this inspection',
+            answerType: 'text',
+            tags: [
+              'owner',
+              'overseer'
+            ]
+          },
+          {
+            id: 3,
+            code: 'SSI-3',
+            title: 'Select site weather conditions at time of this inspection (select all that apply)',
+            answerType: 'multipleChoiceAnswer',
+            tags: [
+              'meteorology',
+              'forecasts'
+            ],
             possibleAnswers: [
               {
-                title: 'a male person',
-                code: 'male'
+                title: 'Clear Sky',
+                code: 'SSI-3-1'
               },
               {
-                title: 'a female person',
-                code: 'female'
+                title: 'Cloudy',
+                code: 'SSI-3-2'
               },
               {
-                title: 'a transgender person',
-                code: 'transgender'
-              }
-            ]},
-          { id: 4, code: 'size', title: 'What\'s your size (in cm)?', answerType: 'numberAnswer', tags: ['size', 'tall', 'person'] },
-          { id: 5, code: 'size', title: 'What\'s your number?', answerType: 'numberAnswer', tags: ['number', 'phone', 'contact', 'person'] },
-          { id: 6,
-            code: 'ethicalLabourStandards',
-            title: 'Do you have a policy defining your approach to labour standards and ethical trading?',
-            answerType: 'choiceAnswer',
-            tags: ['policy', 'labour', 'standards', 'ethical', 'trading'],
-            possibleAnswers: [
-              {
-                title: 'yes please',
-                code: 'yes'
+                title: 'Raining',
+                code: 'SSI-3-3'
               },
               {
-                title: 'no thanks',
-                code: 'no'
+                title: 'Windy',
+                code: 'SSI-3-4'
+              },
+              {
+                title: 'Hazy',
+                code: 'SSI-3-5'
+              },
+              {
+                title: 'Snow/Hail',
+                code: 'SSI-3-6'
+              },
+              {
+                title: 'OTHER',
+                code: 'SSI-3-7'
               }
             ]
           },
-          { id: 7, code: 'ethicalLabourStandardsAttach', title: 'Please attach', answerType: 'fileAnswer', tags: ['attach', 'file', 'upload'] }
+          {
+            id: 4,
+            code: 'SSI-4',
+            title: 'Minimum temperature today?',
+            answerType: 'text',
+            tags: [
+              'degrees',
+              'rise',
+              'ambient'
+            ]
+          },
+          {
+            id: 5,
+            code: 'SSI-5',
+            title: 'Maximum temperature today?',
+            answerType: 'text',
+            tags: [
+              'rise',
+              'degrees',
+              'high',
+              'ambient'
+            ]
+          },
+          {
+            id: 6,
+            code: 'SSI-6',
+            title: 'Current activities being undertaken on site (select all that apply)',
+            answerType: 'multipleChoiceAnswer',
+            tags: [
+              'mission',
+              'labour',
+              'work',
+              'project',
+              'facility'
+            ],
+            possibleAnswers: [
+              {
+                title: 'General',
+                code: 'SSI-6-1'
+              },
+              {
+                title: 'Abatement',
+                code: 'SSI-6-2'
+              },
+              {
+                title: 'Demolition',
+                code: 'SSI-6-3'
+              },
+              {
+                title: 'Pile Driving',
+                code: 'SSI-6-4'
+              },
+              {
+                title: 'Formwork',
+                code: 'SSI-6-5'
+              },
+              {
+                title: 'Reinforce Steel',
+                code: 'SSI-6-6'
+              },
+              {
+                title: 'Steel Erection',
+                code: 'SSI-6-7'
+              },
+              {
+                title: 'Mechanical',
+                code: 'SSI-6-8'
+              },
+              {
+                title: 'Electrical',
+                code: 'SSI-6-9'
+              },
+              {
+                title: 'Plumbing',
+                code: 'SSI-6-10'
+              },
+              {
+                title: 'Glazing',
+                code: 'SSI-6-11'
+              },
+              {
+                title: 'Roofing',
+                code: 'SSI-6-12'
+              },
+              {
+                title: 'Drywall',
+                code: 'SSI-6-13'
+              },
+              {
+                title: 'Painting',
+                code: 'SSI-6-14'
+              },
+              {
+                title: 'Sitework',
+                code: 'SSI-6-15'
+              },
+              {
+                title: 'Excavation',
+                code: 'SSI-6-16'
+              },
+              {
+                title: 'Underground Work',
+                code: 'SSI-6-17'
+              },
+              {
+                title: 'Stair Installation',
+                code: 'SSI-6-18'
+              },
+              {
+                title: 'Cleanup',
+                code: 'SSI-6-19'
+              },
+              {
+                title: 'OTHER',
+                code: 'SSI-6-20'
+              }
+            ]
+          },
+          {
+            id: 7,
+            code: 'SSI-7',
+            title: 'Are first aid facilities to be inspected in this audit? ',
+            answerType: 'choicelist',
+            tags: [
+              'support',
+              'help',
+              'assistance'
+            ],
+            possibleAnswers: [
+              {
+                title: 'Yes',
+                code: 'SSI-7-1'
+              },
+              {
+                title: 'No',
+                code: 'SSI-7-2'
+              },
+              {
+                title: 'N/A',
+                code: 'SSI-7-3'
+              }
+            ]
+          },
+          {
+            id: 8,
+            code: 'SSI-8',
+            title: 'Any further comments or recommendations arising from this inspection? ',
+            answerType: 'textarea',
+            tags: [
+              'discussion',
+              'feedback',
+              'requests'
+            ]
+          },
+          {
+            id: 9,
+            code: 'SSI-9',
+            title: 'Date completed',
+            answerType: 'date',
+            tags: [
+              'End',
+              'Deadline'
+            ]
+          },
+          {
+            id: 10,
+            code: 'SSI-10',
+            title: 'Upload photo (if appropriate)',
+            answerType: 'attachedfile',
+            tags: [
+              'File',
+              'Evidence'
+            ]
+          },
+          {
+            id: 11,
+            code: 'SSI-11',
+            title: 'Number of workers',
+            answerType: 'number',
+            tags: [
+              'End',
+              'Deadline'
+            ]
+          }
         ]
       },
       // the actual search inside the question library
@@ -202,7 +462,7 @@
         this.question.title = question.title
 
         this.question.possibleAnswers = []
-        if (question.answerType === 'choiceAnswer') {
+        if (question.answerType === 'choiceAnswer' || question.answerType === 'multipleChoiceAnswer') {
           for (var i = 0; i < question.possibleAnswers.length; i++) {
             this.question.possibleAnswers.push(question.possibleAnswers[i])
           }
@@ -213,6 +473,9 @@
       },
       // action events
       codeFocus () {
+        this.$emit('questionFocus', this.question)
+      },
+      titleFocus () {
         this.$emit('questionFocus', this.question)
       },
       questionDelete () {
@@ -235,7 +498,7 @@
         }
         this.$nextTick().then(function (component) { // to getElements in the Dom to put the focus on the newly created answer we have to wait until the Dom has been updated
           // focus on last element from possibleAnswers
-          component.$el.querySelector('#possibleAnswer-' + (component.possibleAnswers.length - 1) + ' .possibleAnswerCodeInputField input').focus()
+          component.$el.querySelector('#possibleAnswer-' + (component.question.possibleAnswers.length - 1) + ' .possibleAnswerTitleInputField input').focus()
         })
       },
       toogleConditionalQuestions (value, possibleAnswerCode) {
@@ -244,53 +507,49 @@
         } else {
           this.conditionsAnswersChecked.splice(this.conditionsAnswersChecked.indexOf(possibleAnswerCode), 1)
         }
+      },
+      newConditionalQuestionFocus (emptyQuestion) {
+        emptyQuestion.answerConditions = this.question.conditionsAnswersChecked
+        if (this.question.conditionalQuestions === undefined) {
+          this.question.conditionalQuestions = []
+        }
+        this.question.conditionalQuestions.push(emptyQuestion)
+
+        this.emptyQuestion = {
+          ...emptyQuestionTemplate // clone object
+        }
+        this.$nextTick().then(function (component) { // ot getElements in the Dom to put the focus on the newly created question we have to wait until the Dom has been updated
+          // focus on last element from questionnaire
+          component.$el.querySelector('#question' + component.question.code + '-' + (component.question.conditionalQuestions.length - 1) + ' .titleInputField input').focus()
+        })
+      },
+      newConditionalQuestionDelete (questionToDelete) {
+        console.log('newConditionalQuestionDelete')
+        this.question.conditionalQuestions.splice(this.question.conditionalQuestions.indexOf(questionToDelete), 1)
       }
     },
-    // update the value of the question prop for the parent component
     watch: {
-      // title: function (newValue, oldValue) {
-      //   this.question.title = newValue
-      // },
-      // displayed: function (newValue, oldValue) {
-      //   this.question.displayed = newValue
-      // },
-      // code: function (newValue, oldValue) {
-      //   this.question.code = newValue
-      // },
-      // answerType: function (newValue, oldValue) {
-      //   this.question.answerType = newValue
-      // },
-      // possibleAnswers: {
-      //   handler: function (newValue, oldValue) {
-      //     this.question.possibleAnswers = newValue
-      //   },
-      //   deep: true // means that the watcher is triggered even when a property of the possible answers is modified. Should slow the performance
-      // },
-      // conditionalQuestions: {
-      //   handler: function (newValue, oldValue) {
-      //     console.log('conditionalQuestions')
-      //     console.log(newValue)
-      //     console.log(oldValue)
-      //     this.question.conditionalQuestions = newValue
-      //   },
-      //   deep: true // means that the watcher is triggered even when a property of the possible answers is modified. Should slow the performance
-      // },
-      // answerConditions: {
-      //   handler: function (newValue, oldValue) {
-      //     this.question.answerConditions = newValue
-      //   },
-      //   deep: true // means that the watcher is triggered even when a property of the possible answers is modified. Should slow the performance
-      // },
       conditionsAnswersChecked: function (newValue, oldValue) {
-        for (let i = 0; i < this.question.conditionalQuestions.length; i++) {
-          let conditionalQuestion = this.question.conditionalQuestions[i]
-          // complicated array comparison
-          if (conditionalQuestion.answerConditions.length === newValue.length && conditionalQuestion.answerConditions.every(function (element, index) { // table comparison
-            return element === newValue[index]
-          })) {
-            conditionalQuestion.displayed = true
-          } else {
-            conditionalQuestion.displayed = false
+        if (this.question.conditionalQuestions !== undefined) {
+          for (let i = 0; i < this.question.conditionalQuestions.length; i++) {
+            let conditionalQuestion = this.question.conditionalQuestions[i]
+            // complicated array comparison
+            if (conditionalQuestion.answerConditions !== undefined && newValue !== undefined && conditionalQuestion.answerConditions.length === newValue.length && conditionalQuestion.answerConditions.every(function (element, index) { // table comparison
+              return element === newValue[index]
+            })) {
+              conditionalQuestion.displayed = true
+            } else {
+              conditionalQuestion.displayed = false
+            }
+          }
+        }
+      },
+      'question.conditionalQuestions': {
+        handler: function (newValue, oldValue) { // a new question has been dragged into the condionalquestions of this question
+          if (newValue.length > oldValue.length) { // question dragged into conditionalquestions
+            let questionBeingMoved = newValue.filter(v => !oldValue.includes(v)) // array diff
+            let index = newValue.indexOf(questionBeingMoved[0])
+            this.question.conditionalQuestions[index].answerConditions = this.conditionsAnswersChecked
           }
         }
       }
@@ -304,6 +563,7 @@
       'el-select': Select,
       'el-option': Option,
       'el-checkbox-button': CheckboxButton,
+      'el-alert': Alert,
       'possibleAnswer': PossibleAnswer,
       'checklist-question': ChecklistQuestion,
       'vue-draggable': draggable
@@ -313,3 +573,4 @@
     }
   }
 </script>
+
