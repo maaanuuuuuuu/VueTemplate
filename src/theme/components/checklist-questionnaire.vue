@@ -8,7 +8,7 @@
           class="questionsContainer">
           <question v-for="(question, index) in questionnaire" :question="question" :key="question.id" :id="'question-'+index" v-on:questionDelete="deleteQuestion" class="question"></question>
         </vue-draggable>
-        <question :question="emptyQuestion" v-on:questionFocus="newQuestionFocus" :isDisabled="true" class="emptyQuestionContainer"></question>
+        <question :question="emptyQuestion" v-on:questionInput="newQuestionInput" :isDisabled="true" class="emptyQuestionContainer"></question>
       </el-col>
     </el-row>
   </div>
@@ -77,6 +77,46 @@
             ]
           },
           {
+            id: 12,
+            displayed: true,
+            code: 'SSI-12',
+            title: 'Example of a lot of conditional questions',
+            answerType: 'choiceAnswer',
+            isMandatory: false,
+            possibleAnswers: [
+              {
+                title: 'Choice with conditional questions',
+                code: 'SSI-12-1',
+                mandatoryObservation: false
+              },
+              {
+                title: 'The other choice',
+                code: 'SSI-12-2',
+                mandatoryObservation: false
+              }
+            ],
+            conditionalQuestions: [
+              {
+                id: 13,
+                displayed: false,
+                code: 'SSI-13',
+                title: 'Again a choice with conditional questions',
+                answerType: 'choiceAnswer',
+                isMandatory: false,
+                answerConditions: ['SSI-12-1']
+              },
+              {
+                id: 14,
+                displayed: false,
+                code: 'SSI-14',
+                title: 'The other question',
+                answerType: 'choiceAnswer',
+                isMandatory: false,
+                answerConditions: ['SSI-12-2']
+              }
+            ]
+          },
+          {
             id: 3,
             displayed: true,
             code: 'SSI-3',
@@ -86,31 +126,38 @@
             possibleAnswers: [
               {
                 title: 'Clear Sky',
-                code: 'SSI-3-1'
+                code: 'SSI-3-1',
+                mandatoryObservation: false
               },
               {
                 title: 'Cloudy',
-                code: 'SSI-3-2'
+                code: 'SSI-3-2',
+                mandatoryObservation: false
               },
               {
                 title: 'Raining',
-                code: 'SSI-3-3'
+                code: 'SSI-3-3',
+                mandatoryObservation: false
               },
               {
                 title: 'Windy',
-                code: 'SSI-3-4'
+                code: 'SSI-3-4',
+                mandatoryObservation: false
               },
               {
                 title: 'Hazy',
-                code: 'SSI-3-5'
+                code: 'SSI-3-5',
+                mandatoryObservation: false
               },
               {
                 title: 'Snow/Hail',
-                code: 'SSI-3-6'
+                code: 'SSI-3-6',
+                mandatoryObservation: false
               },
               {
                 title: 'OTHER',
-                code: 'SSI-3-7'
+                code: 'SSI-3-7',
+                mandatoryObservation: true
               }
             ],
             conditionalQuestions: [
@@ -169,83 +216,103 @@
             possibleAnswers: [
               {
                 title: 'General',
-                code: 'SSI-6-1'
+                code: 'SSI-6-1',
+                mandatoryObservation: false
               },
               {
                 title: 'Abatement',
-                code: 'SSI-6-2'
+                code: 'SSI-6-2',
+                mandatoryObservation: false
               },
               {
                 title: 'Demolition',
-                code: 'SSI-6-3'
+                code: 'SSI-6-3',
+                mandatoryObservation: false
               },
               {
                 title: 'Pile Driving',
-                code: 'SSI-6-4'
+                code: 'SSI-6-4',
+                mandatoryObservation: false
               },
               {
                 title: 'Formwork',
-                code: 'SSI-6-5'
+                code: 'SSI-6-5',
+                mandatoryObservation: false
               },
               {
                 title: 'Reinforce Steel',
-                code: 'SSI-6-6'
+                code: 'SSI-6-6',
+                mandatoryObservation: false
               },
               {
                 title: 'Steel Erection',
-                code: 'SSI-6-7'
+                code: 'SSI-6-7',
+                mandatoryObservation: false
               },
               {
                 title: 'Mechanical',
-                code: 'SSI-6-8'
+                code: 'SSI-6-8',
+                mandatoryObservation: false
               },
               {
                 title: 'Electrical',
-                code: 'SSI-6-9'
+                code: 'SSI-6-9',
+                mandatoryObservation: false
               },
               {
                 title: 'Plumbing',
-                code: 'SSI-6-10'
+                code: 'SSI-6-10',
+                mandatoryObservation: false
               },
               {
                 title: 'Glazing',
-                code: 'SSI-6-11'
+                code: 'SSI-6-11',
+                mandatoryObservation: false
               },
               {
                 title: 'Roofing',
-                code: 'SSI-6-12'
+                code: 'SSI-6-12',
+                mandatoryObservation: false
               },
               {
                 title: 'Drywall',
-                code: 'SSI-6-13'
+                code: 'SSI-6-13',
+                mandatoryObservation: false
               },
               {
                 title: 'Painting',
-                code: 'SSI-6-14'
+                code: 'SSI-6-14',
+                mandatoryObservation: false
               },
               {
                 title: 'Sitework',
-                code: 'SSI-6-15'
+                code: 'SSI-6-15',
+                mandatoryObservation: false
               },
               {
                 title: 'Excavation',
-                code: 'SSI-6-16'
+                code: 'SSI-6-16',
+                mandatoryObservation: false
               },
               {
                 title: 'Underground Work',
-                code: 'SSI-6-17'
+                code: 'SSI-6-17',
+                mandatoryObservation: false
               },
               {
                 title: 'Stair Installation',
-                code: 'SSI-6-18'
+                code: 'SSI-6-18',
+                mandatoryObservation: false
               },
               {
                 title: 'Cleanup',
-                code: 'SSI-6-19'
+                code: 'SSI-6-19',
+                mandatoryObservation: false
               },
               {
                 title: 'OTHER',
-                code: 'SSI-6-20'
+                code: 'SSI-6-20',
+                mandatoryObservation: true
               }
             ]
           },
@@ -264,15 +331,18 @@
             possibleAnswers: [
               {
                 title: 'Yes',
-                code: 'SSI-7-1'
+                code: 'SSI-7-1',
+                mandatoryObservation: false
               },
               {
                 title: 'No',
-                code: 'SSI-7-2'
+                code: 'SSI-7-2',
+                mandatoryObservation: false
               },
               {
                 title: 'N/A',
-                code: 'SSI-7-3'
+                code: 'SSI-7-3',
+                mandatoryObservation: true
               }
             ]
           },
@@ -314,13 +384,16 @@
       questionChanged () {
         console.log('question changed')
       },
-      newQuestionFocus (question) {
+      newQuestionInput (question) {
         this.questionnaire.push(question) // a new question is being created
         this.emptyQuestion = {
           ...emptyQuestionTemplate // clone object
         }
         this.$nextTick().then(function (component) { // ot getElements in the Dom to put the focus on the newly created question we have to wait until the Dom has been updated
           // focus on last element from questionnaire
+          component.$el.querySelector('.emptyQuestionContainer .codeInputField input').value = ''
+          component.$el.querySelector('.emptyQuestionContainer .titleInputField input').value = ''
+  
           component.$el.querySelector('#question-' + (component.questionnaire.length - 1) + ' .titleInputField input').focus()
         })
       },

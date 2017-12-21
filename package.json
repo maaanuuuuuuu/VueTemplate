@@ -1,7 +1,7 @@
 {
-  "name": "inspection",
+  "name": "vueTemplate",
   "version": "1.0.0",
-  "description": "the inspection client in vuejs",
+  "description": "the cloud team' starting template",
   "main": "index.js",
   "scripts": {
     "start": "node server",

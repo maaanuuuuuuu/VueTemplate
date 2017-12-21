@@ -11,7 +11,7 @@
         <el-input 
           placeholder="code"
           v-model="question.code"
-          @focus="codeFocus"
+          @input="codeInput"
           @change="codeChange"
           class="codeInputField">
         </el-input>
@@ -20,7 +20,7 @@
         <el-autocomplete 
           placeholder="Create a new question" 
           v-model="question.title"
-          @focus="titleFocus"
+          @input="titleInput"
           :fetch-suggestions="querySearch" 
           :trigger-on-focus="false" 
           @select="questionSelected"
@@ -30,7 +30,7 @@
       <el-col :sm="5">
         <el-select v-model="question.answerType" :disabled="isDisabled" placeholder="Type of answer">
           <el-option label="Text" value="stringAnswer"></el-option>
-          <el-option label="Text" value="textAreaAnswer"></el-option>
+          <el-option label="Text Area" value="longStringAnswer"></el-option>
           <el-option label="Number" value="numberAnswer"></el-option>
           <el-option label="Choice" value="choiceAnswer"></el-option>
           <el-option label="Multiple Choice" value="multipleChoiceAnswer"></el-option>
@@ -60,9 +60,10 @@
           </possibleAnswer>
         </vue-draggable>
         <possibleAnswer
+          class="newPossibleAnswer"
           v-if="question.answerType === 'choiceAnswer' || question.answerType === 'multipleChoiceAnswer' "
           :answer.sync="emptyPossibleAnswer"
-          v-on:answerFocus="newAnswerFocus"
+          v-on:answerInput="newAnswerInput"
           :isDisabled="true"
           >
         </possibleAnswer>
@@ -92,7 +93,7 @@
       <checklist-question 
         v-if="conditionsAnswersChecked !== undefined && conditionsAnswersChecked.length > 0" 
         :question="emptyQuestion"
-        v-on:questionFocus="newConditionalQuestionFocus"
+        v-on:questionInput="newConditionalQuestionInput"
         :isDisabled="true"
         class="emptyQuestionContainer"></checklist-question>
     </el-row>
@@ -147,7 +148,7 @@
   import PossibleAnswer from './checklist-possibleAnswer.vue'
   import ChecklistQuestion from './checklist-question.vue'
 
-  const emptyPossibleAnswerTemplate = {title: '', code: ''}
+  const emptyPossibleAnswerTemplate = {title: '', code: '', mandatoryObservation: false}
   const emptyQuestionTemplate = { id: 0, code: '', title: '', answerType: 'stringAnswer', displayed: true }
 
   export default {
@@ -220,31 +221,38 @@
             possibleAnswers: [
               {
                 title: 'Clear Sky',
-                code: 'SSI-3-1'
+                code: 'SSI-3-1',
+                mandatoryObservation: false
               },
               {
                 title: 'Cloudy',
-                code: 'SSI-3-2'
+                code: 'SSI-3-2',
+                mandatoryObservation: false
               },
               {
                 title: 'Raining',
-                code: 'SSI-3-3'
+                code: 'SSI-3-3',
+                mandatoryObservation: false
               },
               {
                 title: 'Windy',
-                code: 'SSI-3-4'
+                code: 'SSI-3-4',
+                mandatoryObservation: false
               },
               {
                 title: 'Hazy',
-                code: 'SSI-3-5'
+                code: 'SSI-3-5',
+                mandatoryObservation: false
               },
               {
                 title: 'Snow/Hail',
-                code: 'SSI-3-6'
+                code: 'SSI-3-6',
+                mandatoryObservation: false
               },
               {
                 title: 'OTHER',
-                code: 'SSI-3-7'
+                code: 'SSI-3-7',
+                mandatoryObservation: true
               }
             ]
           },
@@ -286,83 +294,103 @@
             possibleAnswers: [
               {
                 title: 'General',
-                code: 'SSI-6-1'
+                code: 'SSI-6-1',
+                mandatoryObservation: false
               },
               {
                 title: 'Abatement',
-                code: 'SSI-6-2'
+                code: 'SSI-6-2',
+                mandatoryObservation: false
               },
               {
                 title: 'Demolition',
-                code: 'SSI-6-3'
+                code: 'SSI-6-3',
+                mandatoryObservation: false
               },
               {
                 title: 'Pile Driving',
-                code: 'SSI-6-4'
+                code: 'SSI-6-4',
+                mandatoryObservation: false
               },
               {
                 title: 'Formwork',
-                code: 'SSI-6-5'
+                code: 'SSI-6-5',
+                mandatoryObservation: false
               },
               {
                 title: 'Reinforce Steel',
-                code: 'SSI-6-6'
+                code: 'SSI-6-6',
+                mandatoryObservation: false
               },
               {
                 title: 'Steel Erection',
-                code: 'SSI-6-7'
+                code: 'SSI-6-7',
+                mandatoryObservation: false
               },
               {
                 title: 'Mechanical',
-                code: 'SSI-6-8'
+                code: 'SSI-6-8',
+                mandatoryObservation: false
               },
               {
                 title: 'Electrical',
-                code: 'SSI-6-9'
+                code: 'SSI-6-9',
+                mandatoryObservation: false
               },
               {
                 title: 'Plumbing',
-                code: 'SSI-6-10'
+                code: 'SSI-6-10',
+                mandatoryObservation: false
               },
               {
                 title: 'Glazing',
-                code: 'SSI-6-11'
+                code: 'SSI-6-11',
+                mandatoryObservation: false
               },
               {
                 title: 'Roofing',
-                code: 'SSI-6-12'
+                code: 'SSI-6-12',
+                mandatoryObservation: false
               },
               {
                 title: 'Drywall',
-                code: 'SSI-6-13'
+                code: 'SSI-6-13',
+                mandatoryObservation: false
               },
               {
                 title: 'Painting',
-                code: 'SSI-6-14'
+                code: 'SSI-6-14',
+                mandatoryObservation: false
               },
               {
                 title: 'Sitework',
-                code: 'SSI-6-15'
+                code: 'SSI-6-15',
+                mandatoryObservation: false
               },
               {
                 title: 'Excavation',
-                code: 'SSI-6-16'
+                code: 'SSI-6-16',
+                mandatoryObservation: false
               },
               {
                 title: 'Underground Work',
-                code: 'SSI-6-17'
+                code: 'SSI-6-17',
+                mandatoryObservation: false
               },
               {
                 title: 'Stair Installation',
-                code: 'SSI-6-18'
+                code: 'SSI-6-18',
+                mandatoryObservation: false
               },
               {
                 title: 'Cleanup',
-                code: 'SSI-6-19'
+                code: 'SSI-6-19',
+                mandatoryObservation: false
               },
               {
                 title: 'OTHER',
-                code: 'SSI-6-20'
+                code: 'SSI-6-20',
+                mandatoryObservation: true
               }
             ]
           },
@@ -379,15 +407,18 @@
             possibleAnswers: [
               {
                 title: 'Yes',
-                code: 'SSI-7-1'
+                code: 'SSI-7-1',
+                mandatoryObservation: false
               },
               {
                 title: 'No',
-                code: 'SSI-7-2'
+                code: 'SSI-7-2',
+                mandatoryObservation: false
               },
               {
                 title: 'N/A',
-                code: 'SSI-7-3'
+                code: 'SSI-7-3',
+                mandatoryObservation: false
               }
             ]
           },
@@ -472,11 +503,11 @@
         this.question.possibleAnswers.splice(this.question.possibleAnswers.indexOf(possibleAnswer), 1)
       },
       // action events
-      codeFocus () {
-        this.$emit('questionFocus', this.question)
+      codeInput () {
+        this.$emit('questionInput', this.question)
       },
-      titleFocus () {
-        this.$emit('questionFocus', this.question)
+      titleInput () {
+        this.$emit('questionInput', this.question)
       },
       questionDelete () {
         this.$emit('questionDelete', this.question)
@@ -491,13 +522,16 @@
           this.questionSelected(result)
         }
       },
-      newAnswerFocus (possibleAnswer) {
+      newAnswerInput (possibleAnswer) {
         this.question.possibleAnswers.push(possibleAnswer) // a new possible answer is being created
         this.emptyPossibleAnswer = {
           ...emptyPossibleAnswerTemplate // clone object
         }
+
         this.$nextTick().then(function (component) { // to getElements in the Dom to put the focus on the newly created answer we have to wait until the Dom has been updated
           // focus on last element from possibleAnswers
+          component.$el.querySelector('.newPossibleAnswer .possibleAnswerCodeInputField input').value = ''
+          component.$el.querySelector('.newPossibleAnswer .possibleAnswerTitleInputField input').value = ''
           component.$el.querySelector('#possibleAnswer-' + (component.question.possibleAnswers.length - 1) + ' .possibleAnswerTitleInputField input').focus()
         })
       },
@@ -508,7 +542,7 @@
           this.conditionsAnswersChecked.splice(this.conditionsAnswersChecked.indexOf(possibleAnswerCode), 1)
         }
       },
-      newConditionalQuestionFocus (emptyQuestion) {
+      newConditionalQuestionInput (emptyQuestion) {
         emptyQuestion.answerConditions = this.question.conditionsAnswersChecked
         if (this.question.conditionalQuestions === undefined) {
           this.question.conditionalQuestions = []
@@ -520,11 +554,12 @@
         }
         this.$nextTick().then(function (component) { // ot getElements in the Dom to put the focus on the newly created question we have to wait until the Dom has been updated
           // focus on last element from questionnaire
+          component.$el.querySelector('.emptyQuestionContainer .codeInputField input').value = ''
+          component.$el.querySelector('.emptyQuestionContainer .titleInputField input').value = ''
           component.$el.querySelector('#question' + component.question.code + '-' + (component.question.conditionalQuestions.length - 1) + ' .titleInputField input').focus()
         })
       },
       newConditionalQuestionDelete (questionToDelete) {
-        console.log('newConditionalQuestionDelete')
         this.question.conditionalQuestions.splice(this.question.conditionalQuestions.indexOf(questionToDelete), 1)
       }
     },
